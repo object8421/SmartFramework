@@ -1,0 +1,12 @@
+# maven #
+target/
+# idea #
+.idea/
+*.iml
+# Eclipse #
+.settings/
+.metadata/
+.classpath
+.project
+Servers/
+$(user.home)/
