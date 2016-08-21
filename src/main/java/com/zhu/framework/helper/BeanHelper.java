@@ -6,7 +6,7 @@ import com.zhu.framework.util.ReflectionUtil;
 import java.util.Map;
 import java.util.Set;
 
-public final class BeanHelper {
+public final class BeanHelper {  // 这个类相当于Bean容器
     private BeanHelper() {}
 
     /**
