@@ -4,9 +4,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.zhu.framework.annotation.Aspect;
+import com.zhu.framework.annotation.Service;
 import com.zhu.framework.proxy.AspectProxy;
 import com.zhu.framework.proxy.Proxy;
 import com.zhu.framework.proxy.ProxyManager;
+import com.zhu.framework.proxy.TransactionProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +38,22 @@ public final class AopHelper {
         }
     }
 
+    private static void addAspectProxy(Map<Class<?>, Set<Class<?>>> proxyMap) throws Exception {
+        Set<Class<?>> proxyClassSet = ClassHelper.getClassSetBySuper(AspectProxy.class);
+        for (Class<?> proxyClass : proxyClassSet) {
+            if (proxyClass.isAnnotationPresent(Aspect.class)) {
+                Aspect aspect = proxyClass.getAnnotation(Aspect.class);
+                Set<Class<?>> targetClassSet = createTargetClassSet(aspect);
+                proxyMap.put(proxyClass, targetClassSet);
+            }
+        }
+    }
+
+    private static void addTransactionProxy(Map<Class<?>, Set<Class<?>>> proxyMap) throws Exception {
+        Set<Class<?>> serviceClassSet = ClassHelper.getClassSetByAnnotation(Service.class);
+        proxyMap.put(TransactionProxy.class, serviceClassSet);
+    }
+
     private static Set<Class<?>> createTargetClassSet(Aspect aspect) throws Exception {
         Set<Class<?>> targetClassSet = Sets.newHashSet();
         Class<? extends Annotation> annotation = aspect.value();
@@ -47,14 +65,8 @@ public final class AopHelper {
 
     private static Map<Class<?>, Set<Class<?>>> createProxyMap() throws Exception {
         Map<Class<?>, Set<Class<?>>> proxyMap = Maps.newHashMap();
-        Set<Class<?>> proxyClassSet = ClassHelper.getClassSetBySuper(AspectProxy.class);
-        for (Class<?> proxyClass : proxyClassSet) {
-            if (proxyClass.isAnnotationPresent(Aspect.class)) {
-                Aspect aspect = proxyClass.getAnnotation(Aspect.class);
-                Set<Class<?>> targetClassSet = createTargetClassSet(aspect);
-                proxyMap.put(proxyClass, targetClassSet);
-            }
-        }
+        addAspectProxy(proxyMap);
+        addTransactionProxy(proxyMap);
         return proxyMap;
     }
 

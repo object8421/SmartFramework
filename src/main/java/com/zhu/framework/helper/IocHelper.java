@@ -14,7 +14,7 @@ import java.util.Map;
  * 通过反射获取类中的所有成员变量。遍历这些变量，判断这些成员变量是否有Inject注解，
  * 若有，则在Bean Map中取出Bean实例
  */
-public class IocHelper {
+public final class IocHelper {
     static {
         Map<Class<?>, Object> beanMap = BeanHelper.getBeanMap();
         if (CollectionUtil.isNotEmpty(beanMap)) {
