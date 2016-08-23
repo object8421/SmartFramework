@@ -1,9 +1,6 @@
 package com.zhu.framework;
 
-import com.zhu.framework.helper.BeanHelper;
-import com.zhu.framework.helper.ClassHelper;
-import com.zhu.framework.helper.ControllerHelper;
-import com.zhu.framework.helper.IocHelper;
+import com.zhu.framework.helper.*;
 import com.zhu.framework.util.ClassUtil;
 
 /**
@@ -14,6 +11,7 @@ public final class HelperLoader {
         Class<?>[] classList = {
                 ClassHelper.class,
                 BeanHelper.class,
+                AopHelper.class,
                 IocHelper.class,
                 ControllerHelper.class
         };

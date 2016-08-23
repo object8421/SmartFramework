@@ -6,8 +6,9 @@ import com.zhu.framework.util.ReflectionUtil;
 import java.util.Map;
 import java.util.Set;
 
-public final class BeanHelper {  // 这个类相当于Bean容器
-    private BeanHelper() {}
+public final class BeanHelper {  // 这个类相当于Bean容器，将产生一个beanClass和Object的map
+    private BeanHelper() {
+    }
 
     /**
      * 定义bean映射
@@ -35,5 +36,12 @@ public final class BeanHelper {  // 这个类相当于Bean容器
             throw new RuntimeException("can not get bean by class:" + cls);
         }
         return (T) BEAN_MAP.get(cls);
+    }
+
+    /**
+     * 设置bean实例
+     */
+    public static void setBean(Class<?> cls, Object obj) {
+        BEAN_MAP.put(cls, obj);
     }
 }
