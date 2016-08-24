@@ -1,14 +1,13 @@
 package com.zhu.framework;
 
-import com.google.common.collect.Maps;
 import com.zhu.framework.bean.Data;
 import com.zhu.framework.bean.Handler;
 import com.zhu.framework.bean.Param;
 import com.zhu.framework.bean.View;
-import com.zhu.framework.helper.BeanHelper;
-import com.zhu.framework.helper.ConfigHelper;
-import com.zhu.framework.helper.ControllerHelper;
-import com.zhu.framework.util.*;
+import com.zhu.framework.helper.*;
+import com.zhu.framework.util.JsonUtil;
+import com.zhu.framework.util.ReflectionUtil;
+import com.zhu.framework.util.StringUtil;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -21,7 +20,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
-import java.util.Enumeration;
 import java.util.Map;
 
 /**
@@ -35,38 +33,31 @@ public class DispatcherServlet extends HttpServlet {
         // 获取请求方法与请求路径
         String requestMethod = request.getMethod().toLowerCase();
         String requestPath = request.getPathInfo();
+
+        if (requestPath.equals("/favicon.ico")) {
+            return;
+        }
         // 获取Action处理器
         Handler handler = ControllerHelper.getHandler(requestMethod, requestPath);
         if (null != handler) {
             // 获取Controller类及其实例
             Class<?> controllerClass = handler.getControllerClass();
             Object controllerBean = BeanHelper.getBean(controllerClass);
-            // 创建请求参数对象
-            Map<String, Object> paramMap = Maps.newHashMap();
-            Enumeration<String> paramNames = request.getParameterNames();
-            while (paramNames.hasMoreElements()) {
-                String paramName = paramNames.nextElement();
-                String paramValue = request.getParameter(paramName);
-                paramMap.put(paramName, paramValue);
+
+            Param param;
+            if (UploadHelper.isMultipart(request)) {
+                param = UploadHelper.createParam(request);
+            } else {
+                param = RequestHelper.createParam(request);
             }
-            String body = CodecUtil.decodeURL(StreamUtil.getString(request.getInputStream()));
-            if (StringUtil.isNotEmpty(body)) {
-                String[] params = StringUtil.splitString(body, "&");
-                if (ArrayUtil.isNotEmpty(params)) {
-                    for (String param : params) {
-                        String[] array = StringUtil.splitString(param, "=");
-                        if (ArrayUtil.isNotEmpty(array) && array.length == 2) {
-                            String paramName = array[0];
-                            String paramValue = array[1];
-                            paramMap.put(paramName, paramValue);
-                        }
-                    }
-                }
-            }
-            Param param = new Param(paramMap);
+            Object result;
             // 调用Action方法
             Method actionMethod = handler.getActionMethod();
-            Object result = ReflectionUtil.invokeMethod(controllerBean, actionMethod, param);
+            if (param.isEmpty()) {
+                result = ReflectionUtil.invokeMethod(controllerBean, actionMethod);
+            } else {
+                result = ReflectionUtil.invokeMethod(controllerBean, actionMethod, param);
+            }
             // 处理Action方法返回值
             if (result instanceof View) {
                 View view = (View) result;
@@ -111,5 +102,11 @@ public class DispatcherServlet extends HttpServlet {
         // 注册处理静态资源的默认Servlet
         ServletRegistration defaultServlet = servletContext.getServletRegistration("default");
         defaultServlet.addMapping(ConfigHelper.getAppAssetPath() + "*");
+        UploadHelper.init(servletContext);
+    }
+
+    private void handleViewResult(View view, HttpServletRequest request, HttpServletResponse response)
+        throws IOException, ServletException {
+
     }
 }
