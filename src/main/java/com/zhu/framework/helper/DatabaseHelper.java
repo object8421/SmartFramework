@@ -34,13 +34,13 @@ public final class DatabaseHelper {
         String driver = ConfigHelper.getJdbcDriver();
         String url = ConfigHelper.getJdbcUrl();
         String username = ConfigHelper.getJdbcUsername();
-        String passowrd = ConfigHelper.getJdbcPassword();
+        String password = ConfigHelper.getJdbcPassword();
 
         DATA_SOURCE = new BasicDataSource();
         DATA_SOURCE.setDriverClassName(driver);
         DATA_SOURCE.setUrl(url);
         DATA_SOURCE.setUsername(username);
-        DATA_SOURCE.setPassword(passowrd);
+        DATA_SOURCE.setPassword(password);
 
     }
 
@@ -179,6 +179,13 @@ public final class DatabaseHelper {
             }
         } catch (Exception e) {
             LOGGER.error("execute sql file failure" + e);
+        }
+    }
+
+    public static String query(String sql, Object... param) {
+        try {
+            Connection conn = getConnection();
+            QUERY_RUNNER.query(sql, conn, )
         }
     }
 
